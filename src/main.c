@@ -6,6 +6,12 @@
  */
 
 #include "stm32f30x.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+#include "semphr.h"
+
 
 int main(void)
 {
