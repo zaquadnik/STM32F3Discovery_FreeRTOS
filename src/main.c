@@ -11,15 +11,23 @@
 #include "queue.h"
 #include "timers.h"
 #include "semphr.h"
+#include "SysTasks.h"
 
 
 int main(void)
 {
 	SystemInit();
 
-	while(1)
-	{
+	TaskHandle_t HtBtHandle = NULL;
 
-	}
+	xTaskCreate(HeartBeatTask,
+	            "HeartBeat",
+				HEART_BEAT_STACK_SIZE,
+	            NULL,
+				HEART_BEAT_TASK_PRIORITY,
+	            &HtBtHandle);
+
+	xPortStartScheduler();
+
 	return 0;
 }

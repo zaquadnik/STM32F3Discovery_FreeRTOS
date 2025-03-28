@@ -55,7 +55,7 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = 0x2000a000;    /* end of RAM */
 
-_Min_Heap_Size = 0;      /* required amount of heap  */
+_Min_Heap_Size = 0x200;      /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
 
 /* Memories definition */
@@ -65,16 +65,55 @@ MEMORY
   ROM (rx)		: ORIGIN = 0x8000000, LENGTH = 256K
 }
 
+/* FreeRTOS MPU definitions */
+__privileged_functions_region_size__  = 40K;
+__privileged_data_region_size__       = 4096;
+__syscalls_region_size__              = 4096;
+
+__FLASH_segment_start__               = ORIGIN( ROM );
+__FLASH_segment_end__                 = __FLASH_segment_start__ + LENGTH( ROM );
+
+__SRAM_segment_start__                = ORIGIN( RAM );
+__SRAM_segment_end__                  = __SRAM_segment_start__ + LENGTH( RAM );
+
+__privileged_functions_start__        = __FLASH_segment_start__;
+__privileged_functions_end__          = __FLASH_segment_start__ + __privileged_functions_region_size__;
+
+__privileged_data_start__             = __SRAM_segment_start__;
+__privileged_data_end__               = __SRAM_segment_start__ + __privileged_data_region_size__;
+
+__syscalls_flash_start__              = __privileged_functions_end__;
+__syscalls_flash_end__                = __privileged_functions_end__ + __syscalls_region_size__;
+
+
 /* Sections */
 SECTIONS
 {
-  /* The startup code into ROM memory */
-  .isr_vector :
+  /* The startup code and FreeRTOS kernel code are placed into privileged
+   * flash. */
+  .privileged_functions :
   {
     . = ALIGN(4);
-    KEEP(*(.isr_vector)) /* Startup code */
+    KEEP(*(.isr_vector)) /* Startup code. */
     . = ALIGN(4);
+    *(privileged_functions)
+    . = ALIGN(4);
+    FILL(0xDEAD);
+    /* Ensure that non-privileged code is placed after the region reserved for
+     * privileged kernel code. */
+    /* Note that dot (.) actually refers to the byte offset from the start of
+     * the current section (.privileged_functions in this case). As a result,
+     * setting dot (.) to a value sets the size of the section. */
+    . = __privileged_functions_region_size__;
   } >ROM
+  
+  .syscalls :
+  {
+  	. = ALIGN(4);
+  	*(syscalls)
+  	. = ALIGN(4);
+  	. = __syscalls_region_size__;
+  }
 
   /* The program code and other data into ROM memory */
   .text :
@@ -147,6 +186,22 @@ SECTIONS
 
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
+
+  /* FreeRTOS kernel data. */
+  .privileged_data :
+  {
+    . = ALIGN(4);
+    _sdata = .;        /* Create a global symbol at data start. */
+    *(privileged_data)
+    . = ALIGN(4);
+    FILL(0xDEAD);
+    /* Ensure that non-privileged data is placed after the region reserved for
+     * privileged kernel data. */
+    /* Note that dot (.) actually refers to the byte offset from the start of
+     * the current section (.privileged_data in this case). As a result, setting
+     * dot (.) to a value sets the size of the section. */
+    . = __privileged_data_region_size__;
+  } >RAM AT> ROM
 
   /* Initialized data sections into RAM memory */
   .data : 
