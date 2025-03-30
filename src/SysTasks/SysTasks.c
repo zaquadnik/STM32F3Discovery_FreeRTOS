@@ -38,7 +38,10 @@ void vApplicationIdleHook(void)
 
 void vApplicationMallocFailedHook(void)
 {
-	uint32_t i;
+}
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
 }
 
 void HeartBeatTask(void *pvParameters)
