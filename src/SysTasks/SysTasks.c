@@ -38,20 +38,57 @@ void vApplicationIdleHook(void)
 
 void vApplicationMallocFailedHook(void)
 {
+	uint32_t i;
+	GPIO_InitTypeDef GpioInit;
+
+	GPIO_StructInit(&GpioInit);
+	GpioInit.GPIO_Pin = GPIO_Pin_9;
+	GpioInit.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_Init(GPIOE, &GpioInit);
+
+	while(1)
+	{
+		GPIO_SetBits(GPIOE,GPIO_Pin_9);
+		for(i=1000000; i>0; i--);
+		GPIO_ResetBits(GPIOE,GPIO_Pin_9);
+		for(i=1000000; i>0; i--);
+	}
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
+	uint32_t i;
+	GPIO_InitTypeDef GpioInit;
+
+	GPIO_StructInit(&GpioInit);
+	GpioInit.GPIO_Pin = GPIO_Pin_10;
+	GpioInit.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_Init(GPIOE, &GpioInit);
+
+	while(1)
+	{
+		GPIO_SetBits(GPIOE,GPIO_Pin_10);
+		for(i=1000000; i>0; i--);
+		GPIO_ResetBits(GPIOE,GPIO_Pin_10);
+		for(i=1000000; i>0; i--);
+	}
 }
 
 void HeartBeatTask(void *pvParameters)
 {
-
 	const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
+	GPIO_InitTypeDef GpioInit;
+
+	GPIO_StructInit(&GpioInit);
+	GpioInit.GPIO_Pin = GPIO_Pin_8;
+	GpioInit.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_Init(GPIOE, &GpioInit);
 
 	while(1)
 	{
-
+		GPIO_SetBits(GPIOE,GPIO_Pin_8);
+		vTaskDelay(xDelay);
+		GPIO_ResetBits(GPIOE,GPIO_Pin_8);
 		vTaskDelay(xDelay);
 	}
 }
