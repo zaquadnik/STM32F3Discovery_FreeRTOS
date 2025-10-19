@@ -18,7 +18,12 @@ int main(void)
 {
 	SystemInit();
 
+	//Need to add MPU init here
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);
+
 	TaskHandle_t HtBtHandle = NULL;
+
 
 	xTaskCreate(HeartBeatTask,
 	            "HeartBeat",
@@ -28,6 +33,12 @@ int main(void)
 	            &HtBtHandle);
 
 	xPortStartScheduler();
+
+
+	while(1)
+	{
+
+	}
 
 	return 0;
 }
