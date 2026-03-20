@@ -112,7 +112,7 @@
  * (in words, not in bytes!).  The kernel does not use this constant for any other
  * purpose.  Demo applications use the constant to make the demos somewhat portable
  * across hardware architectures. */
-#define configMINIMAL_STACK_SIZE                   128
+#define configMINIMAL_STACK_SIZE                   64
 
 /* configMAX_TASK_NAME_LEN sets the maximum length (in characters) of a task's
  * human readable name.  Includes the NULL terminator. */
@@ -285,7 +285,7 @@
 /* Set configAPPLICATION_ALLOCATED_HEAP to 1 to have the application allocate
  * the array used as the FreeRTOS heap.  Set to 0 to have the linker allocate the
  * array used as the FreeRTOS heap.  Defaults to 0 if left undefined. */
-#define configAPPLICATION_ALLOCATED_HEAP             1
+#define configAPPLICATION_ALLOCATED_HEAP             0
 
 /* Set configSTACK_ALLOCATION_FROM_SEPARATE_HEAP to 1 to have task stacks
  * allocated from somewhere other than the FreeRTOS heap.  This is useful if you
@@ -304,11 +304,29 @@
 /* Interrupt nesting behaviour configuration. *********************************/
 /******************************************************************************/
 
+/* Cortex-M specific definitions. */
+#ifdef __NVIC_PRIO_BITS
+	/* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
+	#define configPRIO_BITS       		__NVIC_PRIO_BITS
+#else
+	#define configPRIO_BITS       		4        /* 15 priority levels */
+#endif
+
+/* The lowest interrupt priority that can be used in a call to a "set priority"
+function. */
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY			0xf
+
+/* The highest interrupt priority that can be used by any interrupt service
+routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
+INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
+PRIORITY THAN THIS! (higher priorities are lower numeric values. */
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	5
+
 /* configKERNEL_INTERRUPT_PRIORITY sets the priority of the tick and context
  * switch performing interrupts.  Not supported by all FreeRTOS ports.  See
  * https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to
  * ARM Cortex-M devices. */
-#define configKERNEL_INTERRUPT_PRIORITY          255
+#define configKERNEL_INTERRUPT_PRIORITY          ( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
 
 /* configMAX_SYSCALL_INTERRUPT_PRIORITY sets the interrupt priority above which
  * FreeRTOS API calls must not be made.  Interrupts above this priority are never
@@ -316,11 +334,7 @@
  * highest interrupt priority (0).  Not supported by all FreeRTOS ports.
  * See https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to
  * ARM Cortex-M devices. */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY     32
-
-/* Another name for configMAX_SYSCALL_INTERRUPT_PRIORITY - the name used depends
- * on the FreeRTOS port. */
-#define configMAX_API_CALL_INTERRUPT_PRIORITY    64
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY     ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
 
 /******************************************************************************/
 /* Hook and callback function related definitions. ****************************/
@@ -580,7 +594,7 @@
 
 /* Set configENABLE_MPU to 1 to enable the Memory Protection Unit (MPU), or 0
  * to leave the Memory Protection Unit disabled. */
-#define configENABLE_MPU                  1
+#define configENABLE_MPU                  0
 
 /* Set configENABLE_FPU to 1 to enable the Floating Point Unit (FPU), or 0
  * to leave the Floating Point Unit disabled. */

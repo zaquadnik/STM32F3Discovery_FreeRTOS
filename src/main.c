@@ -12,18 +12,16 @@
 #include "timers.h"
 #include "semphr.h"
 #include "SysTasks.h"
+#include "FreeRTOSConfig.h"
 
 
 int main(void)
 {
 	SystemInit();
 
-	//Need to add MPU init here
-
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);
 
 	TaskHandle_t HtBtHandle = NULL;
-
 
 	xTaskCreate(HeartBeatTask,
 	            "HeartBeat",
@@ -32,7 +30,7 @@ int main(void)
 				HEART_BEAT_TASK_PRIORITY,
 	            &HtBtHandle);
 
-	xPortStartScheduler();
+	vTaskStartScheduler();
 
 
 	while(1)

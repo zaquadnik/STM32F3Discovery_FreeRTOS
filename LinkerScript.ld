@@ -66,9 +66,11 @@ MEMORY
 }
 
 /* FreeRTOS MPU definitions */
+
 __privileged_functions_region_size__  = 32K;
 __privileged_data_region_size__       = 4096;
 __syscalls_region_size__              = 4K;
+
 
 __FLASH_segment_start__               = ORIGIN( ROM );
 __FLASH_segment_end__                 = __FLASH_segment_start__ + LENGTH( ROM );
